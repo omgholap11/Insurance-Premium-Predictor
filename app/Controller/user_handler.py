@@ -1,20 +1,23 @@
-from fastapi import Session , Depends , HTTPException
+from fastapi import  Depends , HTTPException
 from app.Models.user import UserModel
 from app.Schemas.user import UserSchema
 from app.Config.dbconfig import get_db
+from sqlalchemy.orm import Session
 
 
-def handle_user_signup(payload , db : Session = Depends(get_db)):
-    user_pydantic = UserSchema(**payload).model_dump()
-    user_model = UserModel(**user_pydantic)
+def handle_user_signup(payload , db : Session):
+    print(payload)
+    user_model = UserModel(**payload.model_dump())
 
     if user_model is None:
         raise HTTPException(status_code=400 , detail = "Invalid Data Provided")
 
+    print("ommiiiiiiiii......")
     db.add(user_model)
     db.commit()
 
-    raise HTTPException(status=201 , detail="User Created Successfully!!!")
+    return {"msg" : "Signed up successfully!!!"}
 
-
+def handle_user_sign_in(payload , db : Session):
+    return "success"
 

@@ -7,3 +7,8 @@ class UserSchema(BaseModel):
     email : EmailStr = Field(... , description="Email of the user")
     password : str = Field(... , description="Password of the user")
     
+
+class UserSignIn(BaseModel):
+    email : EmailStr = Field(... , description="Email of the user")
+    password : str = Field(... , description="Password of the user")
+    

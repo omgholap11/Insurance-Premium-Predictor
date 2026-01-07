@@ -13,8 +13,12 @@ class UserModel(Base):
     password = Column(String , nullable=False)
 
     insurance_profiles = relationship(
-        "InsuranceProfile" , 
+        "InsuranceProfileModel" , 
         back_populates='user',
         cascade="all, delete-orphan"
     )
-    
+
+
+# Import InsuranceProfileModel after UserModel is defined to avoid circular import
+# This ensures InsuranceProfileModel is in the registry for the relationship
+from app.Models.InsuranceProfile import InsuranceProfileModel
