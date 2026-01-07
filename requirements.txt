@@ -1,0 +1,11 @@
+pandas
+numpy
+seaborn
+matplotlib
+scikit-learn
+python-dotenv
+pydantic
+fastapi
+uvicorn
+sqlalchemy
+psycopg2
