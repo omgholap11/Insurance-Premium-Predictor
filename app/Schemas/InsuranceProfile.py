@@ -13,7 +13,7 @@ tier_2_cities = [
 ]
 
 
-class InsuranceProfile(BaseModel):
+class InsuranceProfileSchema(BaseModel):
     age : Annotated[int , Field(... , gt = 0 , lt = 120 , description="Age of the User")]
     weight : Annotated[float , Field(... , gt=0 , description="Weight of the user")]
     height : Annotated[float , Field(... , gt=0 , description="Height of the user")]
