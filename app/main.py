@@ -12,4 +12,4 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(userrouter , prefix="/user")
 
-
+app.add_middleware()
