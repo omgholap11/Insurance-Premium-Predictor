@@ -28,7 +28,7 @@ class InsuranceProfileSchema(BaseModel):
     "business_owner",
     "unemployed",
     "private_job"
-    ] , Field(... , "Occupation od the user")]
+    ] , Field(... , description="Occupation od the user")]
     
     @computed_field
     @property
