@@ -14,5 +14,6 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(userrouter , prefix="/user")
 
-# app.include_router(insurance_router , prefix='/insurance', dependencies=[Depends(auth_middleware)])
-app.include_router(insurance_router , prefix='/insurance')
+
+app.include_router(insurance_router , prefix='/insurance', dependencies=[Depends(auth_middleware)])
+# app.include_router(insurance_router , prefix='/insurance')

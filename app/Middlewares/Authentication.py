@@ -3,12 +3,13 @@ from app.Services.authentication import verify_access_token
 from fastapi.responses import JSONResponse
 
 
-async def auth_middleware(req : Request , call_next):
+async def auth_middleware(req : Request):
+    print("Middleware Hitten by the requyest.....")
     token = req.cookies['token']
     if not token:
-        return JSONResponse(
+        raise HTTPException(
             status_code=401 , 
-            content={"Details - Unauthorized No token provided!!"}
+            detail={"Details - Unauthorized No token provided!!"}
         )
     try:
         payload = verify_access_token(token)
@@ -16,9 +17,9 @@ async def auth_middleware(req : Request , call_next):
         print(payload)
 
         if payload is None:
-            return JSONResponse(
+            return HTTPException(
                 status_code=401,
-                content={"detail": "Unauthorized - Invalid token"}
+                detail={"detail": "Unauthorized - Invalid token"}
             )
         
         req.state.user = {
@@ -26,19 +27,15 @@ async def auth_middleware(req : Request , call_next):
             "email": payload.email,
             "id": payload.id
         }
-
-        response = call_next(req)
-
-        return response
     
     except HTTPException as e:
-        return JSONResponse(
+        return HTTPException(
             status_code=e.status_code,
-            content={"detail": e.detail}
+            detail={"detail": e.detail}
         )
     
     except Exception as e:
-        return JSONResponse(
+        return HTTPException(
             status_code=500,
-            content={"detail": f"Internal server error: {str(e)}"}
+            detail={"detail": f"Internal server error: {str(e)}"}
         )
