@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, Activity, MapPin, Briefcase, DollarSign, Cigarette, CheckCircle } from 'lucide-react';
+import api from '../../api/axios';
+import toast from 'react-hot-toast';
 
 const cities = [
     "Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Hyderabad", "Pune", // Tier 1
@@ -21,6 +23,7 @@ const occupations = [
 const PredictionForm = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         age: '',
         weight: '',
@@ -44,19 +47,34 @@ const PredictionForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Logic to send data to backend would go here
-        console.log("Submitting:", formData);
+        setLoading(true);
 
-        // Simulating response logic roughly based on profile
-        // Note: In real app, this comes from backend
-        let category = "low";
-        const bmi = formData.weight / (formData.height * formData.height); // Height in meters assumed for BMI formula usually, but schema just says 'height'. 
-        // Assuming height is in meters for BMI, if user enters cm we need conversion, but let's assume standard units or just pass to backend. 
-        // Let's just mock a random result or simple logic for demo.
-        if (formData.smoker || formData.age > 50) category = "high";
-        else if (formData.age > 30) category = "medium";
+        const payload = {
+            age: parseInt(formData.age),
+            weight: parseFloat(formData.weight),
+            height: parseFloat(formData.height),
+            income_lpa: parseFloat(formData.income_lpa),
+            smoker: formData.smoker,
+            city: formData.city,
+            occupation: formData.occupation
+        };
 
-        navigate('/result', { state: { category, formData } });
+        try {
+            const response = await api.post('/insurance/predict', payload, { withCredentials: true });
+            const category = response.data.prediction;
+            toast.success('Prediction calculated!');
+            navigate('/result', { state: { category, formData } });
+        } catch (error) {
+            console.error(error);
+            if (error.response?.status === 401) {
+                toast.error('Session expired. Please login again.');
+                navigate('/login');
+            } else {
+                toast.error(error.response?.data?.detail || 'Prediction failed. Please try again.');
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -242,9 +260,10 @@ const PredictionForm = () => {
                                         </button>
                                         <button
                                             type="submit"
-                                            className="bg-accent hover:bg-accent-hover text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-accent/20 transition-all flex items-center gap-2"
+                                            disabled={loading}
+                                            className="bg-accent hover:bg-accent-hover text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-accent/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Predict Premium <Activity className="w-5 h-5" />
+                                            {loading ? 'Predicting...' : <>Predict Premium <Activity className="w-5 h-5" /></>}
                                         </button>
                                     </div>
                                 </motion.div>

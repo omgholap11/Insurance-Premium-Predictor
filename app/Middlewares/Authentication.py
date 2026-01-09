@@ -4,38 +4,43 @@ from fastapi.responses import JSONResponse
 
 
 async def auth_middleware(req : Request):
-    print("Middleware Hitten by the requyest.....")
-    token = req.cookies['token']
-    if not token:
+    token_with_bearer = req.cookies.get('access_token')
+    print("First Token >>>>   ",req.cookies['access_token'])
+    print("Token>>>>   ",token_with_bearer)
+    if not token_with_bearer:
         raise HTTPException(
             status_code=401 , 
-            detail={"Details - Unauthorized No token provided!!"}
+            detail="Unauthorized - No token provided!!"
         )
+    
     try:
+        
+        if token_with_bearer.startswith("Bearer "):
+            token = token_with_bearer.split(" ")[1]
+        else:
+            token = token_with_bearer
+
         payload = verify_access_token(token)
 
-        print(payload)
-
         if payload is None:
-            return HTTPException(
+            raise HTTPException(
                 status_code=401,
-                detail={"detail": "Unauthorized - Invalid token"}
+                detail="Unauthorized - Invalid token"
             )
-        
+        print("Payload>>>>   ",payload)
         req.state.user = {
-            "name": payload.name,
-            "email": payload.email,
-            "id": payload.id
+            "name": payload['name'],
+            "email": payload['email'],
+            "id": payload['id']
         }
     
     except HTTPException as e:
-        return HTTPException(
-            status_code=e.status_code,
-            detail={"detail": e.detail}
-        )
+
+        raise e
     
     except Exception as e:
-        return HTTPException(
-            status_code=500,
-            detail={"detail": f"Internal server error: {str(e)}"}
+        print(f"Auth Error: {e}")
+        raise HTTPException(
+            status_code=401,
+            detail="Unauthorized - Authentication failed"
         )

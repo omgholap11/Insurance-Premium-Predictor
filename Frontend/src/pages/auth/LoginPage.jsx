@@ -2,17 +2,28 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, LogIn, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import api from '../../api/axios';
+import toast from 'react-hot-toast';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Placeholder for API call
-        console.log("Login with:", { email, password });
-        navigate('/predict');
+        setLoading(true);
+        try {
+            await api.post('/user/signin', { email, password });
+            toast.success('Login successful!');
+            navigate('/predict');
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.detail || 'Login failed. Please check credentials.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -67,9 +78,12 @@ const LoginPage = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-2 group"
+                            disabled={loading}
+                            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Sign In <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            {loading ? 'Signing In...' : (
+                                <>Sign In <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
+                            )}
                         </button>
                     </form>
 

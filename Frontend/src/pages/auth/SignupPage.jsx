@@ -2,17 +2,29 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import api from '../../api/axios';
+import toast from 'react-hot-toast';
 
 const SignupPage = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Signup with:", { name, email, password });
-        navigate('/login');
+        setLoading(true);
+        try {
+            const response = await api.post('/user/signup', { name, email, password });
+            toast.success('Account created successfully! Please login.');
+            navigate('/login');
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.detail || 'Signup failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -79,9 +91,12 @@ const SignupPage = () => {
 
                         <button
                             type="submit"
-                            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-4 rounded-xl shadow-lg shadow-accent/25 hover:shadow-accent/40 transition-all duration-300 flex items-center justify-center gap-2 group mt-4"
+                            disabled={loading}
+                            className="w-full bg-accent hover:bg-accent-hover text-white font-bold py-4 rounded-xl shadow-lg shadow-accent/25 hover:shadow-accent/40 transition-all duration-300 flex items-center justify-center gap-2 group mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Sign Up <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            {loading ? 'Creating Account...' : (
+                                <>Sign Up <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>
+                            )}
                         </button>
                     </form>
 

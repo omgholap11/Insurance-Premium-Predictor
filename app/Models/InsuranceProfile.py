@@ -23,6 +23,8 @@ class InsuranceProfileModel(Base):
         #any one of the model value undergoes changes changes gets replicated in the same one 
     )
 
+    prediction = Column(String , nullable = False)
+
 
 
     
